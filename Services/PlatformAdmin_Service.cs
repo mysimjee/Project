@@ -6,18 +6,11 @@ using user_management.Models;
 
 namespace user_management.Services
 {
-    public class PlatformAdminService
+    public class PlatformAdminService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-
-        public PlatformAdminService(AppDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<bool> UpdatePlatformAdminAsync(int userId, PlatformAdmin updatedAdmin)
         {
-            var platformAdmin = await _context.Users
+            var platformAdmin = await context.Users
                 .OfType<PlatformAdmin>()
                 .FirstOrDefaultAsync(pa => pa.UserId == userId);
 
@@ -31,13 +24,13 @@ namespace user_management.Services
             platformAdmin.JobRole = updatedAdmin.JobRole;
             platformAdmin.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<PlatformAdmin?> GetPlatformAdminByIdAsync(int userId)
         {
-            return await _context.Users
+            return await context.Users
                 .OfType<PlatformAdmin>()      
                 .Include(cc => cc.Role)
                 .Include(cc => cc.AccountStatus)

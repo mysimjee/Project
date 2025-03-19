@@ -6,18 +6,11 @@ using user_management.Models;
 
 namespace user_management.Services
 {
-    public class ViewerService
+    public class ViewerService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-
-        public ViewerService(AppDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<bool> UpdateViewerAsync(int userId, Viewer updatedViewer)
         {
-            var viewer = await _context.Users
+            var viewer = await context.Users
                 .OfType<Viewer>()
                 .FirstOrDefaultAsync(v => v.UserId == userId);
 
@@ -29,13 +22,13 @@ namespace user_management.Services
             viewer.DateOfBirth = updatedViewer.DateOfBirth;
             viewer.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<Viewer?> GetViewerByIdAsync(int userId)
         {
-            return await _context.Users
+            return await context.Users
                 .OfType<Viewer>()
                 .Include(cc => cc.Role)
                 .Include(cc => cc.AccountStatus)

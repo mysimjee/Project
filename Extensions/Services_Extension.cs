@@ -18,6 +18,7 @@ namespace user_management.Extensions
     {
         public static IServiceCollection AddDependencies(this IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowAll",

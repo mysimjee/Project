@@ -5,18 +5,11 @@ using user_management.Models;
 
 namespace user_management.Services
 {
-    public class ContentCreatorService
+    public class ContentCreatorService(AppDbContext context)
     {
-        private readonly AppDbContext _context;
-
-        public ContentCreatorService(AppDbContext context)
-        {
-            _context = context;
-        }
-
         public async Task<bool> UpdateContentCreatorAsync(int userId, ContentCreator updatedCreator)
         {
-            var contentCreator = await _context.Users
+            var contentCreator = await context.Users
                 .OfType<ContentCreator>()
                 .FirstOrDefaultAsync(cc => cc.UserId == userId);
 
@@ -32,13 +25,13 @@ namespace user_management.Services
             contentCreator.PortfolioUrl = updatedCreator.PortfolioUrl;
             contentCreator.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<ContentCreator?> GetContentCreatorByIdAsync(int userId)
         {
-            return await _context.Users
+            return await context.Users
                 .OfType<ContentCreator>()
                 .Include(cc => cc.Role)
                 .Include(cc => cc.AccountStatus)                

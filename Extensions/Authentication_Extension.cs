@@ -1,3 +1,4 @@
+using MongoDB.Bson;
 using user_management.Helpers;
 using user_management.Models;
 using user_management.Services;
@@ -43,12 +44,12 @@ namespace user_management.Extensions
                     user.UserId = await userDirectory.GetUserIdByUsernameAsync(user.Username);
                     logger.LogInformation("User Added: {Result}", result);
                     return result
-                        ? Results.Created("/users/", ApiResponse<User>.Created(user, "User added successfully"))
-                        : Results.BadRequest(ApiResponse<object>.BadRequest("Failed to add user"));
+                        ? Results.Created(string.Empty, ApiResponse<User>.Created(user, "User added successfully"))
+                        : Results.BadRequest(ApiResponse<string>.BadRequest("Failed to add user"));
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError(ApiResponse<object>.Error(ex, "Failed to add user"));
+                    return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
                 }
             })
             .WithName("AddUser")
@@ -71,12 +72,12 @@ namespace user_management.Extensions
                         bool isLoggedOut = await userService.LogoutAsync();
                         logger.LogInformation("User Logout: {IsLoggedOut}", isLoggedOut);
                         return isLoggedOut
-                            ? Results.Ok(ApiResponse<object>.Success(true, "Logout successful."))
-                            : Results.BadRequest(ApiResponse<object>.Error("Already logged out. Please login again to continue."));
+                            ? Results.Ok(ApiResponse<bool>.Success(true, "Logout successful."))
+                            : Results.BadRequest(ApiResponse<string>.Error("Already logged out. Please login again to continue."));
                     }
                     catch (Exception ex)
                     {
-                        return Results.InternalServerError(ApiResponse<object>.Error(ex, "Logout failed."));
+                        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
                     }
                 }).WithName("LogoutUser")
                 .WithOpenApi(operation => new(operation)
@@ -86,26 +87,32 @@ namespace user_management.Extensions
                 });
 
             // Endpoint for user login
-            app.MapPost("/login", async (UserService userService, LoginValidator validator, User user, ILogger<Program> logger) =>
+            app.MapPost("/login", async (UserService userService, AuthService authService,LoginValidator validator, User user, ILogger<Program> logger) =>
             {
                 try
                 {
+                    userService.CurrentUser = user;
+                    
                     var validationResult = await validator.ValidateAsync(user);
+                    
                     if (!validationResult.IsValid)
                     {
-                        return Results.BadRequest(ApiResponse<object>.BadRequest(validationResult.ToString()));
+                        return Results.BadRequest(ApiResponse<string>.BadRequest(validationResult.ToString()));
                     }
                     
-                    userService.CurrentUser = user;
+                 
+                    
                     bool isLoggedIn = await userService.LoginAsync();
+                    
                     logger.LogInformation("User Log In: {IsLoggedIn}", isLoggedIn);
+                    
                     return isLoggedIn
-                        ? Results.Ok(ApiResponse<object>.Success(true, "Login successful."))
-                        : Results.Json(ApiResponse<object>.Unauthorized("Invalid username or password."));
+                        ? Results.Ok(ApiResponse<object>.Success(authService.GenerateToken(userService.CurrentUser), "Login successful."))
+                        : Results.BadRequest(ApiResponse<object>.BadRequest("Invalid username or password."));
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError(ApiResponse<object>.Error(ex, "Login failed."));
+                    return Results.InternalServerError(ApiResponse<object>.Error(ex, ex.Message));
                 }
             })
             .WithName("LoginUser")

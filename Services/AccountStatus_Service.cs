@@ -1,5 +1,4 @@
 
-using Microsoft.EntityFrameworkCore;
 using user_management.Databases;
 using user_management.Models;
 
@@ -15,7 +14,7 @@ namespace user_management.Services
         }
 
         // Get account status by ID
-        public async Task<AccountStatus> GetStatusInfoAsync(int accountStatusId)
+        public async Task<AccountStatus?> GetStatusInfoAsync(int accountStatusId)
         {
             return await _context.AccountStatuses.FindAsync(accountStatusId);
         }
@@ -37,15 +36,16 @@ namespace user_management.Services
         }
 
         // Update an existing account status
-        public async Task<AccountStatus> UpdateStatusAsync(int accountStatusId, string statusName, string description)
+        public async Task<AccountStatus?> UpdateStatusAsync(int accountStatusId, string statusName, string description)
         {
             var status = await _context.AccountStatuses.FindAsync(accountStatusId);
-            if (status == null) return null;
+            if (status != null)
+            {
+                status.StatusName = statusName;
+                status.Description = description;
+                status.UpdatedAt = DateTime.UtcNow;
 
-            status.StatusName = statusName;
-            status.Description = description;
-            status.UpdatedAt = DateTime.UtcNow;
-
+            }
             await _context.SaveChangesAsync();
             return status;
         }

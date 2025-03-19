@@ -7,18 +7,11 @@ using user_management.Models;
 
 namespace user_management.Services
 {
-public class ProductionCompanyService
-    {
-        private readonly AppDbContext _context;
-
-        public ProductionCompanyService(AppDbContext context)
+public class ProductionCompanyService(AppDbContext context)
+{
+    public async Task<bool> UpdateProductionCompanyAsync(int userId, ProductionCompany updatedCompany)
         {
-            _context = context;
-        }
-
-        public async Task<bool> UpdateProductionCompanyAsync(int userId, ProductionCompany updatedCompany)
-        {
-            var productionCompany = await _context.Users
+            var productionCompany = await context.Users
                 .OfType<ProductionCompany>()
                 .FirstOrDefaultAsync(pc => pc.UserId == userId);
 
@@ -33,13 +26,13 @@ public class ProductionCompanyService
             productionCompany.PortfolioUrl = updatedCompany.PortfolioUrl;
             productionCompany.UpdatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             return true;
         }
 
         public async Task<ProductionCompany?> GetProductionCompanyByIdAsync(int userId)
         {
-            return await _context.Users
+            return await context.Users
                 .OfType<ProductionCompany>()
                 .Include(cc => cc.Role)
                 .Include(cc => cc.AccountStatus)

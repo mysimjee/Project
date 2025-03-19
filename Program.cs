@@ -57,12 +57,12 @@ app.MapDelete("/users/{id:int}", async (int id, UserDirectory userDirectory) =>
     {
         bool result = await userDirectory.RemoveUserAsync(id);
         return result
-            ? Results.Ok(ApiResponse<object>.Success(null, "User deleted successfully."))
+            ? Results.Ok(ApiResponse<object>.Success(true, "User deleted successfully."))
             : Results.NotFound(ApiResponse<object>.NotFound("User not found."));
     }
     catch (Exception ex)
     {
-        return Results.BadRequest(ApiResponse<object>.Error(ex));
+        return Results.BadRequest(ApiResponse<object>.Error(ex,ex.Message));
     }
 })
 .WithName("RemoveUser")
@@ -79,12 +79,12 @@ app.MapPut("/users/{id:int}/status/{statusId:int}", async (int id, int statusId,
     {
         var result = await userDirectory.ChangeAccountStatusAsync(id, statusId);
         return result != null
-            ? Results.Json(ApiResponse<object>.Success(result, "Account status updated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("User or status not found."));
+            ? Results.Ok(ApiResponse<AccountStatus?>.Success(result, "Account status updated successfully."))
+            : Results.NotFound(ApiResponse<object>.NotFound("User or status not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("ChangeAccountStatus")
@@ -101,12 +101,12 @@ app.MapPut("/users/{id:int}/role/{roleId:int}", async (int id, int roleId, UserD
     {
         var result = await userDirectory.ChangeRoleAsync(id, roleId);
         return result != null
-            ? Results.Json(ApiResponse<object>.Success(result, "Account status updated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("User or status not found."));
+            ? Results.Ok(ApiResponse<Role?>.Success(result, "Account status updated successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("User or status not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("ChangeRole")
@@ -121,13 +121,13 @@ app.MapGet("/users/{limit:int}/{cursor:int}", async (UserDirectory userDirectory
 {
     try
     {
-        userDirectory.setCursor(cursor);
-        var users = await userDirectory.GetUsersAsync(limit);
-        return Results.Json(ApiResponse<List<User>>.Success(users, "Users retrieved successfully."));
+        userDirectory.SetCursor(cursor);
+        List<User> users = await userDirectory.GetUsersAsync(limit);
+        return Results.Ok(ApiResponse<List<User>>.Success(users, "Users retrieved successfully."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("GetUsers")
@@ -156,19 +156,19 @@ app.MapGet("/users/by-property", async (UserDirectory userDirectory, string prop
         }
 
         var response = await userDirectory.GetUsersByPropertyAsync(property, convertedValue, limit);
-        return Results.Json(new ApiResponse<object>(200, "Users retrieved successfully.", response));
+        return Results.Ok(new ApiResponse<object>(200, "Users retrieved successfully.", response));
     }
     catch (FailToMeetCriteriaException ex)
     {
-        return Results.BadRequest(new ApiResponse<string>(400, ex.Message, null));
+        return Results.BadRequest( ApiResponse<string>.BadRequest(ex.Message));
     }
     catch (Exception ex)
     {
-        return Results.Problem(ex.Message);
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
-.WithName("GetUsersByProperty")  // Set endpoint name
-.WithOpenApi();  // Include in OpenAPI documentation
+.WithName("GetUsersByProperty") 
+.WithOpenApi();  
 
 
 
@@ -176,12 +176,12 @@ app.MapGet("/users/count", (UserDirectory userDirectory) =>
 {
     try
     {
-        int totalCount = userDirectory.totalUsers;
-        return Results.Json(ApiResponse<object>.Success(new { TotalUsers = totalCount }, "Total user count retrieved."));
+        int totalCount = userDirectory.TotalUsers;
+        return Results.Ok(ApiResponse<int>.Success(totalCount, "Total user count retrieved."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("GetTotalUserCount")
@@ -198,11 +198,11 @@ app.MapPost("/roles", async (RoleService roleService, string roleName, string de
     try
     {
         var role = await roleService.CreateRoleAsync(roleName, description, rolePermissions);
-        return Results.Json(ApiResponse<Role>.Created(role, "Role created successfully."));
+        return Results.Created(string.Empty, ApiResponse<Role>.Created(role, "Role created successfully."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to create role."));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("CreateRole")
@@ -218,12 +218,12 @@ app.MapPut("/roles/{roleId:int}", async (int roleId, RoleService roleService, st
     {
         var updatedRole = await roleService.UpdateRoleAsync(roleId, roleName, description, rolePermissions);
         return updatedRole != null
-            ? Results.Json(ApiResponse<Role>.Success(updatedRole, "Role updated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Role not found."));
+            ? Results.Ok(ApiResponse<Role>.Success(updatedRole, "Role updated successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Role not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to update role."));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("UpdateRole")
@@ -237,14 +237,14 @@ app.MapDelete("/roles/{roleId:int}", async (int roleId, RoleService roleService)
 {
     try
     {
-        bool isDeleted = await roleService.DeleteRoleAsync(roleId);
-        return isDeleted
-            ? Results.Json(ApiResponse<object>.Success(null, "Role deleted successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Role not found."));
+        bool? isDeleted = await roleService.DeleteRoleAsync(roleId);
+        return isDeleted != null
+            ? Results.Ok(ApiResponse<bool>.Success(true, "Role deleted successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Role not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to delete role."));
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
     }
 })
 .WithName("DeleteRole")
@@ -260,13 +260,12 @@ app.MapPut("/permissions/{permissionId:int}", async (int permissionId, RoleServi
     {
         var updatedPermission = await roleService.UpdatePermissionAsync(permissionId, permissionName, description);
         return updatedPermission != null
-            ? Results.Json(ApiResponse<RolePermission>.Success(updatedPermission, "Permission updated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Permission not found."));
+            ? Results.Ok(ApiResponse<RolePermission>.Success(updatedPermission, "Permission updated successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Permission not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to update permission."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("UpdatePermission")
 .WithOpenApi(operation => new(operation)
@@ -284,13 +283,12 @@ app.MapGet("/account-status/{accountStatusId:int}", async (int accountStatusId, 
     {
         var status = await accountStatusService.GetStatusInfoAsync(accountStatusId);
         return status != null
-            ? Results.Json(ApiResponse<AccountStatus>.Success(status, "Account status retrieved successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Account status not found."));
+            ? Results.Ok(ApiResponse<AccountStatus>.Success(status, "Account status retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Account status not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to retrieve account status."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("GetAccountStatus")
 .WithOpenApi(operation => new(operation)
@@ -304,12 +302,11 @@ app.MapPost("/account-status", async (AccountStatusService accountStatusService,
     try
     {
         var status = await accountStatusService.CreateStatusAsync(statusName, description);
-        return Results.Json(ApiResponse<AccountStatus>.Created(status, "Account status created successfully."));
+        return Results.Ok(ApiResponse<AccountStatus>.Created(status, "Account status created successfully."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to create account status."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("CreateAccountStatus")
 .WithOpenApi(operation => new(operation)
@@ -324,13 +321,12 @@ app.MapPut("/account-status/{accountStatusId:int}", async (int accountStatusId, 
     {
         var updatedStatus = await accountStatusService.UpdateStatusAsync(accountStatusId, statusName, description);
         return updatedStatus != null
-            ? Results.Json(ApiResponse<AccountStatus>.Success(updatedStatus, "Account status updated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Account status not found."));
+            ? Results.Ok(ApiResponse<AccountStatus>.Success(updatedStatus, "Account status updated successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Account status not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to update account status."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("UpdateAccountStatus")
 .WithOpenApi(operation => new(operation)
@@ -345,13 +341,12 @@ app.MapDelete("/account-status/{accountStatusId:int}", async (int accountStatusI
     {
         bool isDeleted = await accountStatusService.DeleteStatusAsync(accountStatusId);
         return isDeleted
-            ? Results.Json(ApiResponse<object>.Success(null, "Account status deleted successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Account status not found."));
+            ? Results.Ok(ApiResponse<object>.Success(true, "Account status deleted successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Account status not found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to delete account status."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("DeleteAccountStatus")
 .WithOpenApi(operation => new(operation)
@@ -373,13 +368,12 @@ app.MapPost("/login-status", async (UserService userService, User user) =>
         userService.CurrentUser = user;
         var loginStatus = await userService.GetLoginStatusAsync();
         return loginStatus != null
-            ? Results.Json(ApiResponse<LoginHistory>.Success(loginStatus, "Login status retrieved successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("No login history found."));
+            ? Results.Ok(ApiResponse<LoginHistory>.Success(loginStatus, "Login status retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("No login history found."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to retrieve login status."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("GetLoginStatus")
 .WithOpenApi(operation => new(operation)
@@ -395,13 +389,12 @@ app.MapPut("/deactivate-account", async (UserService userService, User user) =>
         userService.CurrentUser = user;
         bool isDeactivated = await userService.DeactivateAccountAsync();
         return isDeactivated
-            ? Results.Json(ApiResponse<object>.Success(null, "Account deactivated successfully."))
-            : Results.Json(ApiResponse<object>.NotFound("Account not found or already inactive."));
+            ? Results.Ok(ApiResponse<object>.Success(true, "Account deactivated successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Account not found or already inactive."));
     }
     catch (Exception ex)
     {
-        return Results.Json(ApiResponse<object>.Error(ex, "Failed to deactivate account."));
-    }
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
 })
 .WithName("DeactivateAccount")
 .WithOpenApi(operation => new(operation)
@@ -446,10 +439,17 @@ app.MapPut("/platform-admins/{userId}", async (int userId, PlatformAdmin updated
 
 app.MapGet("/viewers/{userId}", async (int userId, ViewerService service) =>
 {
-    var viewer = await service.GetViewerByIdAsync(userId);
-    return viewer != null
-        ? Results.Json(ApiResponse<Viewer>.Success(viewer, "Viewer retrieved successfully."))
-        : Results.Json(ApiResponse<string>.NotFound("Viewer not found."));
+    try
+    {
+        var viewer = await service.GetViewerByIdAsync(userId);
+        return viewer != null
+            ? Results.Ok(ApiResponse<Viewer>.Success(viewer, "Viewer retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Viewer not found."));
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+    }
 })
 .WithName("GetViewerById")
 .WithOpenApi(operation => new(operation)
@@ -461,10 +461,17 @@ app.MapGet("/viewers/{userId}", async (int userId, ViewerService service) =>
 
 app.MapGet("/content-creators/{userId}", async (int userId, ContentCreatorService service) =>
 {
-    var contentCreator = await service.GetContentCreatorByIdAsync(userId);
-    return contentCreator != null
-        ? Results.Json(ApiResponse<ContentCreator>.Success(contentCreator, "Content Creator retrieved successfully."))
-        : Results.Json(ApiResponse<string>.NotFound("Content Creator not found."));
+    try
+    {
+        var contentCreator = await service.GetContentCreatorByIdAsync(userId);
+        return contentCreator != null
+            ? Results.Ok(ApiResponse<ContentCreator>.Success(contentCreator, "Content Creator retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Content Creator not found."));
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+    }
 })
 .WithName("GetContentCreatorById")
 .WithOpenApi(operation => new(operation)
@@ -475,10 +482,18 @@ app.MapGet("/content-creators/{userId}", async (int userId, ContentCreatorServic
 
 app.MapGet("/production-companies/{userId}", async (int userId, ProductionCompanyService service) =>
 {
-    var productionCompany = await service.GetProductionCompanyByIdAsync(userId);
-    return productionCompany != null
-        ? Results.Json(ApiResponse<ProductionCompany>.Success(productionCompany, "Production Company retrieved successfully."))
-        : Results.Json(ApiResponse<string>.NotFound("Production Company not found."));
+    try
+    {
+        var productionCompany = await service.GetProductionCompanyByIdAsync(userId);
+        return productionCompany != null
+            ? Results.Ok(ApiResponse<ProductionCompany>.Success(productionCompany, "Production Company retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Production Company not found."));
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+
+    }
 })
 .WithName("GetProductionCompanyById")
 .WithOpenApi(operation => new(operation)
@@ -489,10 +504,17 @@ app.MapGet("/production-companies/{userId}", async (int userId, ProductionCompan
 
 app.MapGet("/platform-admins/{userId}", async (int userId, PlatformAdminService service) =>
 {
-    var platformAdmin = await service.GetPlatformAdminByIdAsync(userId);
-    return platformAdmin != null
-        ? Results.Json(ApiResponse<PlatformAdmin>.Success(platformAdmin, "Platform Admin retrieved successfully."))
-        : Results.Json(ApiResponse<string>.NotFound("Platform Admin not found."));
+    try
+    {
+        var platformAdmin = await service.GetPlatformAdminByIdAsync(userId);
+        return platformAdmin != null
+            ? Results.Ok(ApiResponse<PlatformAdmin>.Success(platformAdmin, "Platform Admin retrieved successfully."))
+            : Results.NotFound(ApiResponse<string>.NotFound("Platform Admin not found."));
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+    }
 })
 .WithName("GetPlatformAdminById")
 .WithOpenApi(operation => new(operation)

@@ -112,9 +112,9 @@ namespace user_management.Models
         public DateTime LoginTimestamp { get; set; } = DateTime.UtcNow;
 
         [MaxLength(50)]
-        public string IpAddress { get; set; } = string.Empty;
+        public string? IpAddress { get; set; } = string.Empty;
 
-        public string DeviceInfo { get; set; } = string.Empty;
+        public string? DeviceInfo { get; set; } = string.Empty;
 
         public int FailedAttempts { get; set; } = 0;
 

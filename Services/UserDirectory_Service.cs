@@ -13,21 +13,23 @@ namespace user_management.Services
     public class UserDirectory
     {
         private readonly AppDbContext _context;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper; // Inject AutoMapper
         private readonly ILogger<UserDirectory> _logger;
 
         private readonly Dictionary<int, UserService> _userServices;
-        public int totalUsers { get; set; }
-        public int cursor { get; set; } = 0;
+        public int TotalUsers { get; set; }
+        private int Cursor { get; set; } 
 
 
-        public UserDirectory(AppDbContext context, IMapper mapper, ILogger<UserDirectory> logger)
+        public UserDirectory(AppDbContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper, ILogger<UserDirectory> logger)
         {
             _context = context;
             _mapper = mapper;
+            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _userServices = new Dictionary<int, UserService>();
-            totalUsers = _context.Users.Count();
+            TotalUsers = _context.Users.Count();
         }
 
 public async Task<int> GetUserIdByUsernameAsync(string username)
@@ -46,14 +48,14 @@ public async Task<bool> AddUserAsync(User user)
         {
 
             // Check if the user already exists
-            var accountWithExistingEmail =  await _context.Users.Where(u => u.Email == user.Email).FirstOrDefaultAsync<User>();
+            var accountWithExistingEmail =  await _context.Users.Where(u => u.Email == user.Email).FirstOrDefaultAsync();
             if (accountWithExistingEmail != null)
             {
                 _logger.LogError("User with this email already exists.");
                 throw new EmailAlreadyExistException("User with this email already exists.");
             }
 
-            var accountWithExistingUsername =  await _context.Users.Where(u => u.Username == user.Username).FirstOrDefaultAsync<User>();
+            var accountWithExistingUsername =  await _context.Users.Where(u => u.Username == user.Username).FirstOrDefaultAsync();
             if (accountWithExistingUsername != null)
             {
                 _logger.LogError("User with this username already exists.");
@@ -100,24 +102,26 @@ public async Task<bool> AddUserAsync(User user)
             return true;
         }
 
-        public async Task<AccountStatus> ChangeAccountStatusAsync(int userId, int accountStatusId)
+        public async Task<AccountStatus?> ChangeAccountStatusAsync(int userId, int accountStatusId)
         {
             var user = await _context.Users.FindAsync(userId);
             var accountStatus = await _context.AccountStatuses.FindAsync(accountStatusId);
-            if (user == null || accountStatus == null) return null;
-            
+            if (user == null) return accountStatus;
+            if (accountStatus == null) return accountStatus;
             user.AccountStatusId = accountStatus.AccountStatusId;
             await _context.SaveChangesAsync();
             return accountStatus;
         }
 
-public async Task<Role> ChangeRoleAsync(int userId, int roleId)
+public async Task<Role?> ChangeRoleAsync(int userId, int roleId)
 {
     var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
     var role = await _context.Roles.FirstOrDefaultAsync(r => r.RoleId == roleId);
 
-    if (user == null) throw new FailToRetrieveAccountInfoException("User not found.");
-    if (role == null) throw new FailToRetrieveAccountInfoException("Role not found.");
+    if (user == null || role == null)
+    {
+        return null;
+    }
 
     // Manually update the RoleId before removing
     user.RoleId = roleId;
@@ -179,21 +183,22 @@ public async Task<Role> ChangeRoleAsync(int userId, int roleId)
             return await _context.Users
                 .Include(cc => cc.Role)
                 .Include(cc => cc.AccountStatus)
+                .Include(cc => cc.LoginHistory)
                 .OrderBy(u => u.UserId)
-                .Skip(cursor)
+                .Skip(Cursor)
                 .Take(limit)
                 .ToListAsync();
         }
 
-        public int setCursor(int cursor)
+        public int SetCursor(int cursor)
         {
-            this.cursor = cursor;
-            return this.cursor;
+            this.Cursor = cursor;
+            return this.Cursor;
         }
 
-        public int getCursor()
+        public int GetCursor()
         {
-            return this.cursor;
+            return this.Cursor;
         }
 
         private UserService GetUserService(int userId)
@@ -201,12 +206,13 @@ public async Task<Role> ChangeRoleAsync(int userId, int roleId)
             var serviceProvider = new ServiceCollection()
                 .AddLogging(loggingBuilder => loggingBuilder.AddSerilog())
                 .BuildServiceProvider();
-            var user_logger = serviceProvider.GetService<ILogger<UserService>>();
-            if (!_userServices.ContainsKey(userId))
+            var userLogger = serviceProvider.GetService<ILogger<UserService>>();
+            if (!_userServices.TryGetValue(userId, out UserService? value))
             {
-                _userServices[userId] = new UserService(_context, _mapper, user_logger);
+                value = new UserService(_context, _mapper, _httpContextAccessor, userLogger!);
+                _userServices[userId] = value;
             }
-            return _userServices[userId];
+            return value;
         }
 
 public async Task<List<User>> GetUsersByPropertyAsync(string propertyName, object value, int limit)
@@ -214,15 +220,16 @@ public async Task<List<User>> GetUsersByPropertyAsync(string propertyName, objec
     var query = _context.Users
         .Include(u => u.Role)
         .Include(u => u.AccountStatus)
+        .Include(u => u.LoginHistory)
         .AsQueryable();
 
     switch (propertyName.ToLower())
     {
         case "username":
-            query = query.Where(u => u.Username == (string)value);
+            query = query.Where(u => u.Username.Contains((string)value));
             break;
         case "email":
-            query = query.Where(u => u.Email == (string)value);
+            query = query.Where(u => u.Email.Contains((string)value));
             break;
         case "roleid":
             query = query.Where(u => u.RoleId == (int)value);
