@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "user_management", "user_management.csproj", "{125D7048-8504-438E-98BA-73A867919136}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{125D7048-8504-438E-98BA-73A867919136}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{125D7048-8504-438E-98BA-73A867919136}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{125D7048-8504-438E-98BA-73A867919136}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{125D7048-8504-438E-98BA-73A867919136}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
