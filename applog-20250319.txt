@@ -1,0 +1,21 @@
+2025-03-19 06:34:56.895 +06:30 [DBG] Hosting starting
+2025-03-19 06:34:56.960 +06:30 [INF] User profile is available. Using '/Users/mohamedsimjee/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-03-19 06:34:56.964 +06:30 [DBG] Reading data from file '/Users/mohamedsimjee/.aspnet/DataProtection-Keys/key-940cfbae-46c2-4777-b882-039925291c0c.xml'.
+2025-03-19 06:34:56.970 +06:30 [DBG] Found key {940cfbae-46c2-4777-b882-039925291c0c}.
+2025-03-19 06:34:56.981 +06:30 [DBG] Considering key {940cfbae-46c2-4777-b882-039925291c0c} with expiration date 2025-06-15 02:02:56Z as default key.
+2025-03-19 06:34:56.982 +06:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=9.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-03-19 06:34:56.984 +06:30 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-03-19 06:34:56.984 +06:30 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-03-19 06:34:56.989 +06:30 [DBG] Using key {940cfbae-46c2-4777-b882-039925291c0c} as the default key.
+2025-03-19 06:34:56.989 +06:30 [DBG] Key ring with default key {940cfbae-46c2-4777-b882-039925291c0c} was loaded during application startup.
+2025-03-19 06:34:57.135 +06:30 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2025-03-19 06:34:57.136 +06:30 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-03-19 06:34:57.144 +06:30 [INF] Now listening on: http://localhost:5150
+2025-03-19 06:34:57.144 +06:30 [DBG] Loaded hosting startup assembly user_management
+2025-03-19 06:34:57.144 +06:30 [INF] Application started. Press Ctrl+C to shut down.
+2025-03-19 06:34:57.144 +06:30 [INF] Hosting environment: Development
+2025-03-19 06:34:57.144 +06:30 [INF] Content root path: /Users/mohamedsimjee/RiderProjects/user_management
+2025-03-19 06:34:57.144 +06:30 [DBG] Hosting started
+2025-03-19 06:35:47.096 +06:30 [INF] Application is shutting down...
+2025-03-19 06:35:47.108 +06:30 [DBG] Hosting stopping
+2025-03-19 06:35:47.176 +06:30 [DBG] Hosting stopped
