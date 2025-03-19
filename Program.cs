@@ -22,16 +22,11 @@ builder.Logging.AddSerilog();
 
 
 
-
-
-
-
-
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
+    app.MapOpenApi();
     app.UseSwagger();
     app.UseSwaggerUI();
     app.UseExceptionHandler("/Error");
@@ -50,8 +45,6 @@ app.MapPost("/authenticate", (User user, AuthService authService)
     => authService.GenerateToken(user));
 
 app.MapGet("/signin", () => "User Authenticated Successfully!").RequireAuthorization();
-
-
 
 
 // Define Minimal API Endpoints
