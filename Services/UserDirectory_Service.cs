@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 
 using AutoMapper;
-using Serilog;
+using Microsoft.AspNetCore.SignalR;
 using user_management.Databases;
 using user_management.Models;
 using user_management.Exceptions;
+using user_management.Hubs;
 
 
 namespace user_management.Services
@@ -13,24 +14,25 @@ namespace user_management.Services
     public class UserDirectory
     {
         private readonly AppDbContext _context;
-        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMapper _mapper; // Inject AutoMapper
         private readonly ILogger<UserDirectory> _logger;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        private readonly Dictionary<int, UserService> _userServices;
         public int TotalUsers { get; set; }
         private int Cursor { get; set; } 
 
 
-        public UserDirectory(AppDbContext context, IHttpContextAccessor httpContextAccessor, IMapper mapper, ILogger<UserDirectory> logger)
+        public UserDirectory(AppDbContext context, IMapper mapper, IHubContext<NotificationHub> hubContext, ILogger<UserDirectory> logger)
         {
             _context = context;
             _mapper = mapper;
-            _httpContextAccessor = httpContextAccessor;
             _logger = logger;
-            _userServices = new Dictionary<int, UserService>();
+            _hubContext = hubContext;
             TotalUsers = _context.Users.Count();
         }
+        
+
+
 
 public async Task<int> GetUserIdByUsernameAsync(string username)
 {
@@ -42,6 +44,16 @@ public async Task<int> GetUserIdByUsernameAsync(string username)
         return 0; 
     }
     return user.UserId;
+}
+
+public async Task<List<LoginHistory>> GetLoginHistoryAsync(int userId, int skip, int limit)
+{
+    return await _context.LoginHistories
+        .Where(lh => lh.UserId == userId)
+        .OrderByDescending(lh => lh.LoginTimestamp)
+        .Skip(skip)
+        .Take(limit)
+        .ToListAsync();
 }
 
 public async Task<bool> AddUserAsync(User user)
@@ -69,6 +81,9 @@ public async Task<bool> AddUserAsync(User user)
 
             // Add user to the appropriate DbSet based on RoleId
             _logger.LogInformation("User RoleId: {0}", user.RoleId);
+            
+            user.AccountStatusId = 3;
+            
             switch (user.RoleId)
             {
             case 1:
@@ -90,6 +105,7 @@ public async Task<bool> AddUserAsync(User user)
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("User Added: {0}", user);
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been registered.");
             return true;
         }
 
@@ -99,6 +115,8 @@ public async Task<bool> AddUserAsync(User user)
             if (user == null) return false;
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
+            _logger.LogInformation("User Removed: {0}", user);
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been removed.");
             return true;
         }
 
@@ -106,10 +124,11 @@ public async Task<bool> AddUserAsync(User user)
         {
             var user = await _context.Users.FindAsync(userId);
             var accountStatus = await _context.AccountStatuses.FindAsync(accountStatusId);
-            if (user == null) return accountStatus;
-            if (accountStatus == null) return accountStatus;
+            if (user == null) return null;
+            if (accountStatus == null) return null;
             user.AccountStatusId = accountStatus.AccountStatusId;
             await _context.SaveChangesAsync();
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} account status has been changed to {accountStatus.StatusName}.");
             return accountStatus;
         }
 
@@ -170,7 +189,8 @@ public async Task<Role?> ChangeRoleAsync(int userId, int roleId)
                 break;
             }
     await _context.SaveChangesAsync();
-
+    _logger.LogInformation("User RoleId: {0}", user.RoleId);
+    await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} role has been changed to {roleId}.");
     return role;
 }
 
@@ -195,25 +215,9 @@ public async Task<Role?> ChangeRoleAsync(int userId, int roleId)
             this.Cursor = cursor;
             return this.Cursor;
         }
+        
 
-        public int GetCursor()
-        {
-            return this.Cursor;
-        }
 
-        private UserService GetUserService(int userId)
-        {
-            var serviceProvider = new ServiceCollection()
-                .AddLogging(loggingBuilder => loggingBuilder.AddSerilog())
-                .BuildServiceProvider();
-            var userLogger = serviceProvider.GetService<ILogger<UserService>>();
-            if (!_userServices.TryGetValue(userId, out UserService? value))
-            {
-                value = new UserService(_context, _mapper, _httpContextAccessor, userLogger!);
-                _userServices[userId] = value;
-            }
-            return value;
-        }
 
 public async Task<List<User>> GetUsersByPropertyAsync(string propertyName, object value, int limit)
 {

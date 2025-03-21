@@ -132,14 +132,12 @@ namespace user_management.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("DeviceInfo")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<int>("FailedAttempts")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("IpAddress")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
@@ -333,6 +331,31 @@ namespace user_management.Migrations
                     b.HasDiscriminator().HasValue("User");
 
                     b.UseTphMappingStrategy();
+                });
+
+            modelBuilder.Entity("user_management.Models.VerificationCode", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("VerificationCodes");
                 });
 
             modelBuilder.Entity("user_management.Models.ContentCreator", b =>

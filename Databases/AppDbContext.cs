@@ -15,6 +15,8 @@ namespace user_management.Databases
         public DbSet<ProductionCompany> ProductionCompanies { get; set; }
         public DbSet<Viewer> Viewers { get; set; }
         public DbSet<PlatformAdmin> PlatformAdmins { get; set; }
+        
+        public DbSet<VerificationCode> VerificationCodes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

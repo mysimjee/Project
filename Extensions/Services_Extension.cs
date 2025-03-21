@@ -18,6 +18,7 @@ namespace user_management.Extensions
     {
         public static IServiceCollection AddDependencies(this IServiceCollection services)
         {
+            
             services.AddHttpContextAccessor();
             services.AddCors(options =>
             {
@@ -26,11 +27,26 @@ namespace user_management.Extensions
                                     .AllowAnyMethod()
                                     .AllowAnyHeader());
             });
+            
+            // Allow only specific origins and with credentials
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost",
+                    builder => builder
+                        .WithOrigins("http://localhost:63342") // Your frontend URL
+                        .AllowCredentials()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod());
+            });
+            
+            services.AddSignalR();
 
             services.AddTransient<AuthService>();
 
+            
             services.AddSwaggerGen(c =>
             {
+                c.AddSignalRSwaggerGen();
                 c.SwaggerDoc("v1", new() { Title = "Only_Myanmar", Version = "v1" });
 
                 var securityScheme = new OpenApiSecurityScheme
@@ -101,6 +117,7 @@ namespace user_management.Extensions
             services.AddScoped<ProductionCompanyService>();
             services.AddScoped<ViewerService>();
             services.AddScoped<PlatformAdminService>();
+            services.AddScoped<EmailService>();
 
             // Register Validator
             services.AddScoped<RegisterValidator>();

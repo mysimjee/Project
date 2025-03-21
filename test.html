@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignalR Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/@microsoft/signalr@5.0.0/dist/browser/signalr.min.js"></script>
+</head>
+<body>
+<h1>SignalR JavaScript Client Test</h1>
+<p>Open the browser console to see the connection status and messages.</p>
+
+<script>
+    // Create a connection to the SignalR hub
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("https://localhost:7125/hubs/NotificationHub") // Updated to your URL
+        .configureLogging(signalR.LogLevel.Information)
+        .build();
+
+    // Handle the "ReceiveMessage" event from the server
+    connection.on("ReceiveMessage", function (user, message) {
+        console.log(`: ${message}`);
+        alert(`: ${message}`);
+    });
+
+
+    connection.on("ReceiveNotification", function (message) {
+        console.log(`: ${message}`);
+        alert(`: ${message}`);
+    });
+    // Start the connection
+    connection.start().then(function () {
+        console.log("SignalR connection established.");
+
+        // Example: Send a message to the hub
+        connection.invoke("JoinAdminGroup")
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+        
+
+        // Example: Send a message to the hub
+        connection.invoke("SendMessage", "Hello from JavaScript!")
+            .catch(function (err) {
+                return console.error(err.toString());
+            });
+    }).catch(function (err) {
+        console.error("Error while establishing connection: " + err.toString());
+    });
+</script>
+</body>
+</html>

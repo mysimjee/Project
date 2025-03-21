@@ -86,6 +86,30 @@ namespace user_management.Extensions
                     Description = "Clears the session and logs out the user."
                 });
 
+            app.MapPut("/users/update", async (UserService userService, User updatedUser, ILogger<Program> logger) =>
+                {
+                    try
+                    {
+                        userService.CurrentUser = updatedUser;
+                        var updatedUserInfo = await userService.UpdateAccountAsync(updatedUser);
+        
+                        logger.LogInformation("User Updated: {User}", updatedUserInfo);
+
+                        return Results.Ok(ApiResponse<User>.Success(updatedUserInfo!, "User updated successfully."));
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError("Error updating user: {Error}", ex.Message);
+                        return Results.InternalServerError(ApiResponse<string>.Error(ex, "Failed to update user."));
+                    }
+                })
+                .WithName("UpdateUser")
+                .WithOpenApi(operation => new(operation)
+                {
+                    Summary = "Update an existing user",
+                    Description = "Updates the user information (username, email, password)."
+                });
+
             // Endpoint for user login
             app.MapPost("/login", async (UserService userService, AuthService authService,LoginValidator validator, User user, ILogger<Program> logger) =>
             {

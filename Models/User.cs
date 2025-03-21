@@ -143,7 +143,7 @@ namespace user_management.Models
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }
 
-    public class ContentCreator : User, IUser
+    public class ContentCreator : User
     {
         [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
@@ -169,11 +169,11 @@ namespace user_management.Models
             var age = DateTime.Today.Year - dateOfBirth.Year;
             if (dateOfBirth > DateTime.Today.AddYears(-age)) age--;
 
-            return age >= 18 ? ValidationResult.Success : new ValidationResult("Content creator must be at least 18 years old.");
+            return (age >= 18 ? ValidationResult.Success : new ValidationResult("Content creator must be at least 18 years old."))!;
         }
     }
 
-    public class ProductionCompany : User, IUser
+    public class ProductionCompany : User
     {
         [MaxLength(100)]
         public string CompanyName { get; set; } = string.Empty;
@@ -189,7 +189,7 @@ namespace user_management.Models
         public string PortfolioUrl { get; set; } = string.Empty;
     }
 
-    public class Viewer : User, IUser
+    public class Viewer : User
     {
         [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
@@ -206,11 +206,11 @@ namespace user_management.Models
             var age = DateTime.Today.Year - dateOfBirth.Year;
             if (dateOfBirth > DateTime.Today.AddYears(-age)) age--;
 
-            return age >= 18 ? ValidationResult.Success : new ValidationResult("Viewer must be at least 18 years old.");
+            return (age >= 18 ? ValidationResult.Success : new ValidationResult("Viewer must be at least 18 years old."))!;
         }
     }
 
-    public class PlatformAdmin : User, IUser
+    public class PlatformAdmin : User
     {
         [MaxLength(50)]
         public string FirstName { get; set; } = string.Empty;
@@ -232,7 +232,7 @@ namespace user_management.Models
             var age = DateTime.Today.Year - dateOfBirth.Year;
             if (dateOfBirth > DateTime.Today.AddYears(-age)) age--;
 
-            return age >= 18 ? ValidationResult.Success : new ValidationResult("Platform admin must be at least 18 years old.");
+            return (age >= 18 ? ValidationResult.Success : new ValidationResult("Platform admin must be at least 18 years old."))!;
         }
     }
 
