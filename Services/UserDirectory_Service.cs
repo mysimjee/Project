@@ -105,7 +105,7 @@ public async Task<bool> AddUserAsync(User user)
 
             await _context.SaveChangesAsync();
             _logger.LogInformation("User Added: {0}", user);
-            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been registered.");
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been registered.");
             return true;
         }
 
@@ -116,7 +116,7 @@ public async Task<bool> AddUserAsync(User user)
             _context.Users.Remove(user);
             await _context.SaveChangesAsync();
             _logger.LogInformation("User Removed: {0}", user);
-            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been removed.");
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been removed.");
             return true;
         }
 
@@ -128,7 +128,7 @@ public async Task<bool> AddUserAsync(User user)
             if (accountStatus == null) return null;
             user.AccountStatusId = accountStatus.AccountStatusId;
             await _context.SaveChangesAsync();
-            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} account status has been changed to {accountStatus.StatusName}.");
+            await _hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} account status has been changed to {accountStatus.StatusName}.");
             return accountStatus;
         }
 
@@ -190,7 +190,7 @@ public async Task<Role?> ChangeRoleAsync(int userId, int roleId)
             }
     await _context.SaveChangesAsync();
     _logger.LogInformation("User RoleId: {0}", user.RoleId);
-    await _hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} role has been changed to {roleId}.");
+    await _hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} role has been changed to {roleId}.");
     return role;
 }
 

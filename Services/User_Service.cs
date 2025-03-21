@@ -17,11 +17,10 @@ public class UserService(
     ILogger<UserService> logger,
     IHubContext<NotificationHub> hubContext)
 {
-    // Store the current logged-in user
+
     public User? CurrentUser { get; set; }
 
 
-    // Login User - This will check credentials and set the CurrentUser property
     public async Task<bool> LoginAsync()
     {
         
@@ -34,11 +33,11 @@ public class UserService(
         
         var today = DateTime.UtcNow.Date;
 
-// Count previous failed attempts today
+
         int failedAttemptsToday = await context.LoginHistories
             .Where(lh => lh.UserId == existingUser!.UserId &&
                          lh.LoginTimestamp >= today &&
-                         !lh.LoginSuccessful) // Only count failed attempts
+                         !lh.LoginSuccessful)
             .CountAsync();
         
         var loginHistory = new LoginHistory
@@ -50,8 +49,6 @@ public class UserService(
             FailedAttempts = failedAttemptsToday,
             LoginSuccessful = false
         };
-
-        
         
         bool isPasswordValid = BCrypt.Net.BCrypt.Verify(CurrentUser!.PasswordHash, existingUser.PasswordHash);
 
@@ -76,17 +73,16 @@ public class UserService(
         existingUser.UpdatedAt = DateTime.UtcNow;
         logger.LogInformation("Account Status Updated to Active.");
 
-        // Log the login history
+
  
         context.LoginHistories.Add(loginHistory);
         await context.SaveChangesAsync();
-
-        // Set the CurrentUser property to the logged-in user
+        
         CurrentUser = existingUser;
 
         if (loginHistory.LoginSuccessful)
         {
-            await hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {existingUser.Username} has been login.");
+            await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {existingUser.Username} has been login.");
         }
         return true;
     }
@@ -139,7 +135,7 @@ public async Task<bool> LogoutAsync()
     }
     if (result > 0)
     {
-        await hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been logout!");
+        await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been logout!");
     }
     return result > 0;
 }
@@ -176,7 +172,7 @@ public async Task<bool> LogoutAsync()
             int result = await context.SaveChangesAsync();
             if (result > 0)
             {
-                await hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has been deactivated!");
+                await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been deactivated!");
             }
             return result > 0;
     }
@@ -188,7 +184,7 @@ public async Task<bool> LogoutAsync()
 
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
         await context.SaveChangesAsync();
-        await hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User {user.Username} has reset password!");
+        await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has reset password!");
         return true;
     }
 
@@ -234,7 +230,7 @@ public async Task<User?> UpdateAccountAsync(User updatedUser)
 
     if (result > 0)
     {
-        await hubContext.Clients.Group("Admins").SendAsync("ReceiveNotification", $"User: {user.Username} has been updated!");
+        await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User: {user.Username} has been updated!");
 
     }
     return user;

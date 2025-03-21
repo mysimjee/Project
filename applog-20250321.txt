@@ -4813,3 +4813,123 @@ System.Net.WebSockets.WebSocketException (0x80004005): The remote party closed t
 2025-03-21 14:16:44.383 +06:30 [VRB] Ending connection heartbeat.
 2025-03-21 14:16:44.385 +06:30 [DBG] Hosting stopping
 2025-03-21 14:16:44.390 +06:30 [DBG] Hosting stopped
+2025-03-21 16:50:24.443 +06:30 [DBG] Registered SignalR Protocol: json, implemented by Microsoft.AspNetCore.SignalR.Protocol.JsonHubProtocol.
+2025-03-21 16:50:24.475 +06:30 [VRB] 'NotificationHub' hub method 'JoinAdminGroup' is bound.
+2025-03-21 16:50:24.476 +06:30 [VRB] 'NotificationHub' hub method 'LeaveAdminGroup' is bound.
+2025-03-21 16:50:24.477 +06:30 [VRB] 'NotificationHub' hub method 'SendMessage' is bound.
+2025-03-21 16:50:24.478 +06:30 [VRB] 'NotificationHub' hub method 'SendNotificationToAdmins' is bound.
+2025-03-21 16:50:24.487 +06:30 [DBG] Hosting starting
+2025-03-21 16:50:24.493 +06:30 [INF] User profile is available. Using '/Users/mohamedsimjee/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-03-21 16:50:24.495 +06:30 [DBG] Reading data from file '/Users/mohamedsimjee/.aspnet/DataProtection-Keys/key-940cfbae-46c2-4777-b882-039925291c0c.xml'.
+2025-03-21 16:50:24.498 +06:30 [DBG] Found key {940cfbae-46c2-4777-b882-039925291c0c}.
+2025-03-21 16:50:24.502 +06:30 [DBG] Considering key {940cfbae-46c2-4777-b882-039925291c0c} with expiration date 2025-06-15 02:02:56Z as default key.
+2025-03-21 16:50:24.502 +06:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=9.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-03-21 16:50:24.503 +06:30 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-03-21 16:50:24.504 +06:30 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-03-21 16:50:24.505 +06:30 [DBG] Using key {940cfbae-46c2-4777-b882-039925291c0c} as the default key.
+2025-03-21 16:50:24.505 +06:30 [DBG] Key ring with default key {940cfbae-46c2-4777-b882-039925291c0c} was loaded during application startup.
+2025-03-21 16:50:24.574 +06:30 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2025-03-21 16:50:24.575 +06:30 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-03-21 16:50:24.697 +06:30 [INF] Now listening on: https://localhost:7125
+2025-03-21 16:50:24.697 +06:30 [INF] Now listening on: http://localhost:5150
+2025-03-21 16:50:24.697 +06:30 [DBG] Loaded hosting startup assembly user_management
+2025-03-21 16:50:24.697 +06:30 [INF] Application started. Press Ctrl+C to shut down.
+2025-03-21 16:50:24.697 +06:30 [INF] Hosting environment: Development
+2025-03-21 16:50:24.697 +06:30 [INF] Content root path: /Users/mohamedsimjee/RiderProjects/user_management
+2025-03-21 16:50:24.697 +06:30 [VRB] Starting connection heartbeat.
+2025-03-21 16:50:24.700 +06:30 [DBG] Hosting started
+2025-03-21 17:04:15.349 +06:30 [INF] Application is shutting down...
+2025-03-21 17:04:15.350 +06:30 [VRB] Ending connection heartbeat.
+2025-03-21 17:04:15.350 +06:30 [DBG] Hosting stopping
+2025-03-21 17:04:15.363 +06:30 [DBG] Hosting stopped
+2025-03-21 17:11:27.997 +06:30 [DBG] Registered SignalR Protocol: json, implemented by Microsoft.AspNetCore.SignalR.Protocol.JsonHubProtocol.
+2025-03-21 17:11:28.027 +06:30 [VRB] 'NotificationHub' hub method 'JoinAdminGroup' is bound.
+2025-03-21 17:11:28.028 +06:30 [VRB] 'NotificationHub' hub method 'LeaveAdminGroup' is bound.
+2025-03-21 17:11:28.029 +06:30 [VRB] 'NotificationHub' hub method 'SendMessage' is bound.
+2025-03-21 17:11:28.030 +06:30 [VRB] 'NotificationHub' hub method 'SendNotificationToAdmins' is bound.
+2025-03-21 17:11:28.036 +06:30 [DBG] Hosting starting
+2025-03-21 17:11:28.041 +06:30 [INF] User profile is available. Using '/Users/mohamedsimjee/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2025-03-21 17:11:28.043 +06:30 [DBG] Reading data from file '/Users/mohamedsimjee/.aspnet/DataProtection-Keys/key-940cfbae-46c2-4777-b882-039925291c0c.xml'.
+2025-03-21 17:11:28.045 +06:30 [DBG] Found key {940cfbae-46c2-4777-b882-039925291c0c}.
+2025-03-21 17:11:28.049 +06:30 [DBG] Considering key {940cfbae-46c2-4777-b882-039925291c0c} with expiration date 2025-06-15 02:02:56Z as default key.
+2025-03-21 17:11:28.050 +06:30 [DBG] Forwarded activator type request from Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Version=9.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60 to Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption.ConfigurationModel.AuthenticatedEncryptorDescriptorDeserializer, Microsoft.AspNetCore.DataProtection, Culture=neutral, PublicKeyToken=adb9793829ddae60
+2025-03-21 17:11:28.051 +06:30 [DBG] Using managed symmetric algorithm 'System.Security.Cryptography.Aes'.
+2025-03-21 17:11:28.051 +06:30 [DBG] Using managed keyed hash algorithm 'System.Security.Cryptography.HMACSHA256'.
+2025-03-21 17:11:28.052 +06:30 [DBG] Using key {940cfbae-46c2-4777-b882-039925291c0c} as the default key.
+2025-03-21 17:11:28.052 +06:30 [DBG] Key ring with default key {940cfbae-46c2-4777-b882-039925291c0c} was loaded during application startup.
+2025-03-21 17:11:28.116 +06:30 [DBG] Middleware configuration started with options: {AllowedHosts = *, AllowEmptyHosts = True, IncludeFailureMessage = True}
+2025-03-21 17:11:28.117 +06:30 [DBG] Wildcard detected, all requests with hosts will be allowed.
+2025-03-21 17:11:28.214 +06:30 [INF] Now listening on: https://localhost:7125
+2025-03-21 17:11:28.215 +06:30 [INF] Now listening on: http://localhost:5150
+2025-03-21 17:11:28.215 +06:30 [DBG] Loaded hosting startup assembly user_management
+2025-03-21 17:11:28.215 +06:30 [INF] Application started. Press Ctrl+C to shut down.
+2025-03-21 17:11:28.215 +06:30 [INF] Hosting environment: Development
+2025-03-21 17:11:28.215 +06:30 [INF] Content root path: /Users/mohamedsimjee/RiderProjects/user_management
+2025-03-21 17:11:28.215 +06:30 [VRB] Starting connection heartbeat.
+2025-03-21 17:11:28.216 +06:30 [DBG] Hosting started
+2025-03-21 17:11:59.452 +06:30 [DBG] Connection id "0HNB8CK13AQJF" accepted.
+2025-03-21 17:11:59.452 +06:30 [DBG] Connection id "0HNB8CK13AQJF" started.
+2025-03-21 17:11:59.480 +06:30 [DBG] Connection 0HNB8CK13AQJF established using the following protocol: "Tls12"
+2025-03-21 17:11:59.489 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "SETTINGS" frame for stream ID 0 with length 24 and flags "NONE".
+2025-03-21 17:11:59.491 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "WINDOW_UPDATE" frame for stream ID 0 with length 4 and flags 0x0.
+2025-03-21 17:11:59.491 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "SETTINGS" frame for stream ID 0 with length 24 and flags "NONE".
+2025-03-21 17:11:59.492 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "SETTINGS" frame for stream ID 0 with length 0 and flags "ACK".
+2025-03-21 17:11:59.492 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "WINDOW_UPDATE" frame for stream ID 0 with length 4 and flags 0x0.
+2025-03-21 17:11:59.492 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "HEADERS" frame for stream ID 1 with length 531 and flags "END_STREAM, END_HEADERS, PRIORITY".
+2025-03-21 17:11:59.498 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "SETTINGS" frame for stream ID 0 with length 0 and flags "ACK".
+2025-03-21 17:11:59.502 +06:30 [INF] Request starting HTTP/2 GET https://localhost:7125/swagger/index.html - null null
+2025-03-21 17:11:59.503 +06:30 [VRB] All hosts are allowed.
+2025-03-21 17:11:59.533 +06:30 [DBG] No candidates found for the request path '/swagger/index.html'
+2025-03-21 17:11:59.533 +06:30 [DBG] Request did not match any endpoints
+2025-03-21 17:11:59.553 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.553 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.597 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "HEADERS" frame for stream ID 1 with length 66 and flags "END_HEADERS".
+2025-03-21 17:11:59.597 +06:30 [INF] Request finished HTTP/2 GET https://localhost:7125/swagger/index.html - 200 null text/html;charset=utf-8 95.3768ms
+2025-03-21 17:11:59.597 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 1 with length 714 and flags "END_STREAM".
+2025-03-21 17:11:59.617 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "HEADERS" frame for stream ID 3 with length 99 and flags "END_STREAM, END_HEADERS, PRIORITY".
+2025-03-21 17:11:59.618 +06:30 [INF] Request starting HTTP/2 GET https://localhost:7125/swagger/index.js - null null
+2025-03-21 17:11:59.619 +06:30 [VRB] All hosts are allowed.
+2025-03-21 17:11:59.621 +06:30 [DBG] No candidates found for the request path '/swagger/index.js'
+2025-03-21 17:11:59.621 +06:30 [DBG] Request did not match any endpoints
+2025-03-21 17:11:59.622 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.622 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.626 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "HEADERS" frame for stream ID 3 with length 41 and flags "END_HEADERS".
+2025-03-21 17:11:59.626 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 3 with length 3113 and flags "END_STREAM".
+2025-03-21 17:11:59.626 +06:30 [INF] Request finished HTTP/2 GET https://localhost:7125/swagger/index.js - 200 null application/javascript;charset=utf-8 7.3209ms
+2025-03-21 17:11:59.722 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "HEADERS" frame for stream ID 5 with length 75 and flags "END_STREAM, END_HEADERS, PRIORITY".
+2025-03-21 17:11:59.723 +06:30 [INF] Request starting HTTP/2 GET https://localhost:7125/swagger/v1/swagger.json - null null
+2025-03-21 17:11:59.723 +06:30 [VRB] All hosts are allowed.
+2025-03-21 17:11:59.724 +06:30 [DBG] No candidates found for the request path '/swagger/v1/swagger.json'
+2025-03-21 17:11:59.724 +06:30 [DBG] Request did not match any endpoints
+2025-03-21 17:11:59.725 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.725 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:11:59.733 +06:30 [INF] No action descriptors found. This may indicate an incorrectly configured application or missing application parts. To learn more, visit https://aka.ms/aspnet/mvc/app-parts
+2025-03-21 17:11:59.735 +06:30 [DBG] Executing API description provider 'EndpointMetadataApiDescriptionProvider' from assembly Microsoft.AspNetCore.Mvc.ApiExplorer v9.0.0.0.
+2025-03-21 17:11:59.816 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "HEADERS" frame for stream ID 5 with length 35 and flags "END_HEADERS".
+2025-03-21 17:11:59.816 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 5 with length 16384 and flags "NONE".
+2025-03-21 17:11:59.816 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 5 with length 16384 and flags "NONE".
+2025-03-21 17:11:59.817 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 5 with length 16384 and flags "NONE".
+2025-03-21 17:11:59.817 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 5 with length 703 and flags "NONE".
+2025-03-21 17:11:59.819 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 5 with length 0 and flags "END_STREAM".
+2025-03-21 17:11:59.819 +06:30 [INF] Request finished HTTP/2 GET https://localhost:7125/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 95.6557ms
+2025-03-21 17:12:07.099 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "HEADERS" frame for stream ID 7 with length 28 and flags "END_STREAM, END_HEADERS, PRIORITY".
+2025-03-21 17:12:07.100 +06:30 [INF] Request starting HTTP/2 GET https://localhost:7125/roles - null null
+2025-03-21 17:12:07.100 +06:30 [VRB] All hosts are allowed.
+2025-03-21 17:12:07.105 +06:30 [DBG] 1 candidate(s) found for the request path '/roles'
+2025-03-21 17:12:07.106 +06:30 [DBG] Request matched endpoint 'HTTP: GET /roles'
+2025-03-21 17:12:07.107 +06:30 [VRB] The endpoint does not specify the IRequestSizeLimitMetadata.
+2025-03-21 17:12:07.107 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:12:07.107 +06:30 [DBG] AuthenticationScheme: Bearer was not authenticated.
+2025-03-21 17:12:07.109 +06:30 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-03-21 17:12:07.109 +06:30 [DBG] Static files was skipped as the request already matched an endpoint.
+2025-03-21 17:12:07.112 +06:30 [INF] Executing endpoint 'HTTP: GET /roles'
+2025-03-21 17:12:07.778 +06:30 [INF] Fetched Roles: System.Collections.Generic.List`1[user_management.Models.Role]
+2025-03-21 17:12:07.780 +06:30 [INF] Setting HTTP status code 200.
+2025-03-21 17:12:07.782 +06:30 [INF] Writing value of type 'ApiResponse`1' as Json.
+2025-03-21 17:12:07.783 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "HEADERS" frame for stream ID 7 with length 66 and flags "END_HEADERS".
+2025-03-21 17:12:07.783 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 7 with length 852 and flags "NONE".
+2025-03-21 17:12:07.783 +06:30 [INF] Executed endpoint 'HTTP: GET /roles'
+2025-03-21 17:12:07.784 +06:30 [VRB] Connection id "0HNB8CK13AQJF" received "WINDOW_UPDATE" frame for stream ID 0 with length 4 and flags 0x0.
+2025-03-21 17:12:07.784 +06:30 [INF] HTTP GET /roles responded 200 in 673.1373 ms
+2025-03-21 17:12:07.785 +06:30 [VRB] Connection id "0HNB8CK13AQJF" sending "DATA" frame for stream ID 7 with length 0 and flags "END_STREAM".
+2025-03-21 17:12:07.787 +06:30 [INF] Request finished HTTP/2 GET https://localhost:7125/roles - 200 null application/json; charset=utf-8 687.3162ms

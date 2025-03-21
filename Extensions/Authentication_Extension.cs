@@ -1,5 +1,6 @@
-using MongoDB.Bson;
+
 using user_management.Helpers;
+using user_management.Hubs;
 using user_management.Models;
 using user_management.Services;
 using user_management.Validators;
@@ -10,54 +11,11 @@ namespace user_management.Extensions
     {
         public static WebApplication AddAuthenticationExtension(this WebApplication app)
         {
-            // Endpoint to fetch all roles
-            app.MapGet("/roles", async (RoleService roleService, ILogger<Program> logger) =>
-            {
-                try
-                {
-                    // Get all roles from the RoleService
-                    var roles = await roleService.GetAllRolesAsync();
-                    logger.LogInformation("Fetched Roles: {Roles}", roles.ToString());
 
-                    // Return a success response with the roles
-                    return Results.Ok(ApiResponse<List<Role>>.Success(roles, "Fetched roles successfully."));
-                }
-                catch (Exception ex)
-                {
-                    // Handle any exceptions and return an error response
-                    return Results.InternalServerError(ApiResponse<object>.Error(ex, "Failed to fetch roles."));
-                }
-            });
+            app.UseAuthentication();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-            // Endpoint to add a user
-            app.MapPost("/users", async (User user, UserDirectory userDirectory, RegisterValidator validator, ILogger<Program> logger) =>
-            {
-                try
-                {
-                    var validationResult = await validator.ValidateAsync(user);
-                    if (!validationResult.IsValid)
-                    {
-                        return Results.BadRequest(ApiResponse<object>.BadRequest(validationResult.ToString()));
-                    }
-
-                    bool result = await userDirectory.AddUserAsync(user);
-                    user.UserId = await userDirectory.GetUserIdByUsernameAsync(user.Username);
-                    logger.LogInformation("User Added: {Result}", result);
-                    return result
-                        ? Results.Created(string.Empty, ApiResponse<User>.Created(user, "User added successfully"))
-                        : Results.BadRequest(ApiResponse<string>.BadRequest("Failed to add user"));
-                }
-                catch (Exception ex)
-                {
-                    return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
-                }
-            })
-            .WithName("AddUser")
-            .WithOpenApi(operation => new(operation)
-            {
-                Summary = "Add a new user",
-                Description = "Creates a new user if email and username are unique."
-            });
 
             app.MapPost("/logout", async (UserService userService, LoginValidator validator, User user, ILogger<Program> logger) =>
                 {
@@ -145,6 +103,155 @@ namespace user_management.Extensions
                 Summary = "Login a user",
                 Description = "Authenticates user and sets login session."
             });
+            
+
+app.MapGet("/login-status/{userId:int}", async (UserService userService, int userId) =>
+    {
+        try
+        {
+            userService.CurrentUser!.UserId = userId;
+            var loginStatus = await userService.GetLoginStatusAsync();
+            return loginStatus != null
+                ? Results.Ok(ApiResponse<LoginHistory>.Success(loginStatus, "Login status retrieved successfully."))
+                : Results.NotFound(ApiResponse<string>.NotFound("No login history found."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
+    })
+    .WithName("GetLoginStatus")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Get user login status",
+        Description = "Fetches the latest login history entry."
+    });
+
+app.MapPut("/deactivate-account", async (UserService userService, User user) =>
+    {
+        try
+        {
+            userService.CurrentUser = user;
+            bool isDeactivated = await userService.DeactivateAccountAsync();
+            return isDeactivated
+                ? Results.Ok(ApiResponse<object>.Success(true, "Account deactivated successfully."))
+                : Results.NotFound(ApiResponse<string>.NotFound("Account not found or already inactive."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    }
+    })
+    .WithName("DeactivateAccount")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Deactivate a user account",
+        Description = "Changes the account status to 'Inactive'."
+    });
+
+app.MapPost("/verifyemail", async (VerifyEmailRequest request, EmailService service) =>
+    {
+        try
+        {
+            var isVerified = await service.VerifyEmailAsync(request.Email, request.Code);
+            return isVerified
+                ? Results.Ok(ApiResponse<bool>.Success(true, "Email verified successfully."))
+                : Results.BadRequest(ApiResponse<string>.BadRequest("Invalid or expired verification code."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
+        }
+    })
+    .WithName("VerifyEmail")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Verify Email",
+        Description = "Verifies a user's email using a verification code and updates their account status."
+    });
+
+
+app.MapGet("/validateemailcode/{email}/{code}", async (string email, string code, EmailService service) =>
+    {
+        try
+        {
+            var isValid = await service.ValidateVerificationCodeAsync(email, code);
+            return isValid
+                ? Results.Ok(ApiResponse<bool>.Success(true, "Verification code is valid."))
+                : Results.BadRequest(ApiResponse<string>.Error("Invalid or expired verification code."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+        }
+    })
+    .WithName("ValidateEmailVerificationCode")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Validate Email Verification Code",
+        Description = "Checks if the provided email verification code is valid and not expired."
+    });
+
+
+app.MapPost("/resetpassword", async (ResetPasswordRequest request, LoginValidator validator,EmailService emailService, UserService userService) =>
+    {
+        try
+        {
+            userService.CurrentUser = new User
+            {
+                Email = request.Email,
+                PasswordHash = request.NewPassword
+            };
+
+            var validationResult = await validator.ValidateAsync(userService.CurrentUser);
+                    
+            if (!validationResult.IsValid)
+            {
+                return Results.BadRequest(ApiResponse<string>.BadRequest(validationResult.ToString()));
+            }
+
+            
+            var isValid = await emailService.ValidateVerificationCodeAsync(request.Email, request.Code);
+            if (!isValid)
+            {
+                return Results.BadRequest(ApiResponse<string>.Error("Invalid or expired verification code."));
+            }
+            
+            var resetSuccess = await userService.ResetPasswordAsync(request.Email, request.NewPassword);
+            return resetSuccess
+                ? Results.Ok(ApiResponse<bool>.Success(true, "Password reset successfully."))
+                : Results.NotFound(ApiResponse<string>.NotFound("User not found."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex));
+        }
+    })
+    .WithName("ResetPassword")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Reset Password",
+        Description = "Allows users to reset their password using a valid email verification code."
+    });
+
+app.MapGet("/sendemailcode/{email}", async (string email, EmailService service) =>
+    {
+        try
+        {
+            var platformAdmin = await service.SendEmailVerificationCodeAsync(email);
+            return platformAdmin
+                ? Results.Ok(ApiResponse<bool>.Success(true, "Verification code sent successfully."))
+                : Results.NotFound(ApiResponse<string>.NotFound("Email not found."));
+        }
+        catch (Exception ex)
+        {
+            return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));    
+        }
+    })
+    .WithName("SendEmailVerificationCode")
+    .WithOpenApi(operation => new(operation)
+    {
+        Summary = "Send Email Verification Code",
+        Description = "Sends an email verification code."
+    });
 
             return app;
         }
