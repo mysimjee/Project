@@ -12,14 +12,34 @@ namespace user_management.Extensions
     {
         public static WebApplication AddUserManagementExtension(this WebApplication app)
         {
-            
-            app.MapGet("/loginhistory/{userId}/{skip}/{limit}", async (int userId, UserDirectory service, int skip = 0, int limit = 10) =>
+            app.MapGet("/loginhistory/count/{userId}", async (int userId, UserDirectory service) =>
+                {
+                    try
+                    {
+                        var count = await service.GetLoginHistoryCountAsync(userId);  // A method that returns the count of login history for the user
+                        return count >= 0
+                            ? Results.Ok(ApiResponse<int>.Success(count, count.ToString()))
+                            : Results.NotFound(ApiResponse<string>.NotFound("No login history found for this user."));
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
+                    }
+                })
+                .WithName("GetLoginHistoryCount")
+                .WithOpenApi(operation => new(operation)
+                {
+                    Summary = "Get Login History Count",
+                    Description = "Retrieves the total number of login history entries for a user."
+                });
+
+            app.MapGet("/loginhistory/{userId}/{skip}/{limit}", async (int userId, UserService service, int skip = 0, int limit = 10) =>
                 {
                     try
                     {
                         var history = await service.GetLoginHistoryAsync(userId, skip, limit);
                         return history.Any()
-                            ? Results.Ok(ApiResponse<List<LoginHistory>>.Success(history, "Login history retrieved successfully."))
+                            ? Results.Ok(ApiResponse<List<LoginHistory>>.Success(history, history.Count.ToString()))
                             : Results.NotFound(ApiResponse<string>.NotFound("No login history found for this user."));
                     }
                     catch (Exception ex)
@@ -176,26 +196,26 @@ app.MapGet("/users/count", (UserDirectory userDirectory) =>
             });
 
             // Endpoint to add a user
-            app.MapPost("/users", async (User user, UserDirectory userDirectory, RegisterValidator validator, ILogger<Program> logger) =>
+            app.MapPost("/users", async (User user, AuthService authService, UserDirectory userDirectory, RegisterValidator validator, ILogger<Program> logger) =>
             {
                 try
                 {
                     var validationResult = await validator.ValidateAsync(user);
                     if (!validationResult.IsValid)
                     {
-                        return Results.BadRequest(ApiResponse<object>.BadRequest(validationResult.ToString()));
+                        return Results.BadRequest(ApiResponse<string>.BadRequest(validationResult.ToString()));
                     }
 
                     bool result = await userDirectory.AddUserAsync(user);
-                    user.UserId = await userDirectory.GetUserIdByUsernameAsync(user.Username);
+                    var newUser = await userDirectory.GetUserInfoByUsernameAsync(user.Username);
                     logger.LogInformation("User Added: {Result}", result);
                     return result
-                        ? Results.Created(string.Empty, ApiResponse<User>.Created(user, "User added successfully"))
+                        ? Results.Created(string.Empty, ApiResponse<User>.Created(newUser!, authService.GenerateToken(newUser!)))
                         : Results.BadRequest(ApiResponse<string>.BadRequest("Failed to add user"));
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
+                    return Results.InternalServerError(ApiResponse<string>.Error(ex));
                 }
             })
             .WithName("AddUser")

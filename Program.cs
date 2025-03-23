@@ -1,7 +1,3 @@
-
-using user_management.Models;
-using user_management.Services;
-using user_management.Helpers;
 using user_management.Extensions;
 
 using Serilog;
@@ -18,8 +14,19 @@ builder.Logging.ClearProviders();
 builder.Logging.AddSerilog(); 
 
 
+//Enable Cors
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy => policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader());
+});
+
+
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 
 // Configure the HTTP request pipeline.
 app.AddAuthenticationExtension();

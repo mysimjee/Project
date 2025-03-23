@@ -7,8 +7,7 @@ namespace user_management.Extensions
     {
         public static WebApplication AddExtraExtension(this WebApplication app)
         {
-            app.UseCors("AllowLocalhost");
-            app.UseCors("AllowAll");
+   
             app.MapHub<NotificationHub>("/hubs/NotificationHub");
             
             if (app.Environment.IsDevelopment())

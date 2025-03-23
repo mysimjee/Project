@@ -23,13 +23,9 @@ public class UserService(
 
     public async Task<bool> LoginAsync()
     {
-        
-        var username = CurrentUser?.Username;
-        var email = CurrentUser?.Email;
-
         // Find the user by username or email
         var existingUser = await context.Users
-            .FirstOrDefaultAsync(u => u.Username == username || u.Email == email);
+            .FirstOrDefaultAsync(u => u.Username == CurrentUser!.Username || u.Email == CurrentUser!.Email);
         
         var today = DateTime.UtcNow.Date;
 
@@ -58,10 +54,11 @@ public class UserService(
             await context.SaveChangesAsync();
             return false;
         }
+        
         loginHistory.LoginSuccessful = true;
 
         // Update account status to Active
-        var activeStatus = await context.AccountStatuses.FindAsync(1);
+        var activeStatus = await context.AccountStatuses.FindAsync(3);
 
         if (activeStatus == null)
         {
@@ -72,9 +69,7 @@ public class UserService(
         existingUser.AccountStatusId = activeStatus.AccountStatusId;
         existingUser.UpdatedAt = DateTime.UtcNow;
         logger.LogInformation("Account Status Updated to Active.");
-
-
- 
+        
         context.LoginHistories.Add(loginHistory);
         await context.SaveChangesAsync();
         
@@ -90,16 +85,15 @@ public class UserService(
     // Logout User - This will clear the CurrentUser property
 public async Task<bool> LogoutAsync()
 {
-    string username = CurrentUser!.Username;
-    string email = CurrentUser!.Email;
-    
-    var user = await context.Users.FirstOrDefaultAsync(u => u.Username == username || u.Email == email);
 
-    logger.LogInformation("Existing User: {User}", user?.ToString());
+    var user = await context.Users.FirstOrDefaultAsync(u => u.Username == CurrentUser!.Username || u.Email == CurrentUser!.Email);
     
+
     if (user == null)
+    {
         throw new FailToRetrieveAccountInfoException("User not found.");
 
+    }
     if (user.AccountStatusId == 7)
     {
         return false;
@@ -109,34 +103,25 @@ public async Task<bool> LogoutAsync()
     var loggedOutStatus = await context.AccountStatuses.FindAsync(7);
 
     if (loggedOutStatus == null)
+    {
         throw new FailToUpdateException("Failed to retrieve 'Logged Out' status.");
+    }
 
     // Update user account status to "Logged Out"
     user.AccountStatusId = loggedOutStatus.AccountStatusId;
     user.UpdatedAt = DateTime.UtcNow;
-
-    // Log the logout history
-    var logoutHistory = new LoginHistory
+    
+    
+    var result = await context.SaveChangesAsync();
+    switch (result)
     {
-        UserId = user.UserId,
-        LoginTimestamp = DateTime.UtcNow,
-        IpAddress = "127.0.0.1",
-        DeviceInfo = "Web Browser", 
-        FailedAttempts = 0,
-        LoginSuccessful = false
-    };
-
-    context.LoginHistories.Add(logoutHistory);
-
-    int result = await context.SaveChangesAsync();
-    if (result == 0)
-    {
-        throw new FailToUpdateException("Failed to update logout status.");
+        case 0:
+            throw new FailToUpdateException("Failed to update logout status.");
+        case > 0:
+            await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been logout!");
+            break;
     }
-    if (result > 0)
-    {
-        await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User {user.Username} has been logout!");
-    }
+
     return result > 0;
 }
 
@@ -148,11 +133,14 @@ public async Task<bool> LogoutAsync()
             .FirstOrDefaultAsync();
     }
 
-    public async Task<List<LoginHistory>> GetLoginHistoryAsync()
+    public async Task<List<LoginHistory>> GetLoginHistoryAsync(int userId, int skip, int limit)
     {
         return await context.LoginHistories
-            .Where(lh => lh.UserId == CurrentUser!.UserId)
-            .OrderByDescending(lh => lh.LoginTimestamp).ToListAsync();
+            .Where(lh => lh.UserId == userId)
+            .OrderByDescending(lh => lh.LoginTimestamp)
+            .Skip(skip)
+            .Take(limit)
+            .ToListAsync();
     }
     
     public async Task<bool> DeactivateAccountAsync()
@@ -209,30 +197,37 @@ public async Task<User?> UpdateAccountAsync(User updatedUser)
     {
         bool emailExists = await context.Users.AnyAsync(u => u.Email == updatedUser.Email);
         if (emailExists)
-            throw new EmailAlreadyExistException("Email is already registered.");
+            throw new EmailAlreadyExistException("An account with this email already registered.");
 
         user.Email = updatedUser.Email;
     }
 
     // Update password if provided
-    if (!string.IsNullOrEmpty(updatedUser.PasswordHash))
+    if (!string.IsNullOrEmpty(updatedUser.PasswordHash) && updatedUser.PasswordHash != user.PasswordHash)
     {
         user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(updatedUser.PasswordHash);
     }
 
     user.UpdatedAt = DateTime.UtcNow;
 
+    user.RoleId = updatedUser.RoleId;
+    user.ZipCode = updatedUser.ZipCode;
+    user.PhoneNumber = updatedUser.PhoneNumber;
+    user.Country = updatedUser.Country;
+    user.RecoveryEmail = updatedUser.RecoveryEmail;
+    user.ProfileImgPath = updatedUser.ProfileImgPath;
+    
     int result = await context.SaveChangesAsync();
-    if (result == 0)
+    
+    switch (result)
     {
-                throw new FailToUpdateException("Failed to update user account.");
+        case 0:
+            throw new FailToUpdateException();
+        case > 0:
+            await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User: {user.Username} has been updated!");
+            break;
     }
 
-    if (result > 0)
-    {
-        await hubContext.Clients.Group("Admins").SendAsync("ReceiveUserNotification", $"User: {user.Username} has been updated!");
-
-    }
     return user;
 }
 

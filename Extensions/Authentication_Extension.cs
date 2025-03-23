@@ -1,6 +1,5 @@
 
 using user_management.Helpers;
-using user_management.Hubs;
 using user_management.Models;
 using user_management.Services;
 using user_management.Validators;
@@ -17,16 +16,17 @@ namespace user_management.Extensions
             app.UseAuthorization();
 
 
-            app.MapPost("/logout", async (UserService userService, LoginValidator validator, User user, ILogger<Program> logger) =>
+            app.MapPost("/logout", async (UserService userService, LoginRequest user, ILogger<Program> logger) =>
                 {
                     try
                     {
-                        var validationResult = await validator.ValidateAsync(user);
-                        if (!validationResult.IsValid)
+                        var userServiceCurrentUser = new User()
                         {
-                            return Results.BadRequest(ApiResponse<object>.BadRequest(validationResult.ToString()));
-                        }
-                        userService.CurrentUser = user;
+                            Username = user.Username,
+                            Email = user.Email,
+                            PasswordHash = user.PasswordHash,
+                        };
+                        userService.CurrentUser = userServiceCurrentUser;
                         bool isLoggedOut = await userService.LogoutAsync();
                         logger.LogInformation("User Logout: {IsLoggedOut}", isLoggedOut);
                         return isLoggedOut
@@ -44,7 +44,7 @@ namespace user_management.Extensions
                     Description = "Clears the session and logs out the user."
                 });
 
-            app.MapPut("/users/update", async (UserService userService, User updatedUser, ILogger<Program> logger) =>
+            app.MapPut("/users/update", async (UserService userService, AuthService authService, User updatedUser, ILogger<Program> logger) =>
                 {
                     try
                     {
@@ -52,8 +52,8 @@ namespace user_management.Extensions
                         var updatedUserInfo = await userService.UpdateAccountAsync(updatedUser);
         
                         logger.LogInformation("User Updated: {User}", updatedUserInfo);
-
-                        return Results.Ok(ApiResponse<User>.Success(updatedUserInfo!, "User updated successfully."));
+                        
+                        return Results.Ok(ApiResponse<User>.Success(updatedUserInfo!, authService.GenerateToken(updatedUserInfo!) ));
                     }
                     catch (Exception ex)
                     {
@@ -69,32 +69,37 @@ namespace user_management.Extensions
                 });
 
             // Endpoint for user login
-            app.MapPost("/login", async (UserService userService, AuthService authService,LoginValidator validator, User user, ILogger<Program> logger) =>
+            app.MapPost("/login", async (UserService userService, AuthService authService,LoginValidator validator, LoginRequest user, ILogger<Program> logger) =>
             {
                 try
                 {
-                    userService.CurrentUser = user;
+                    var userServiceCurrentUser = new User()
+                    {
+                        Username = user.Username,
+                        Email = user.Email,
+                        PasswordHash = user.PasswordHash,
+                    };
                     
-                    var validationResult = await validator.ValidateAsync(user);
+                    userService.CurrentUser = userServiceCurrentUser;
+                    
+                    var validationResult = await validator.ValidateAsync(userServiceCurrentUser);
                     
                     if (!validationResult.IsValid)
                     {
                         return Results.BadRequest(ApiResponse<string>.BadRequest(validationResult.ToString()));
                     }
                     
-                 
-                    
                     bool isLoggedIn = await userService.LoginAsync();
                     
                     logger.LogInformation("User Log In: {IsLoggedIn}", isLoggedIn);
                     
                     return isLoggedIn
-                        ? Results.Ok(ApiResponse<object>.Success(authService.GenerateToken(userService.CurrentUser), "Login successful."))
-                        : Results.BadRequest(ApiResponse<object>.BadRequest("Invalid username or password."));
+                        ? Results.Ok(ApiResponse<User>.Success(userService.CurrentUser, authService.GenerateToken(userService.CurrentUser)))
+                        : Results.BadRequest(ApiResponse<string>.BadRequest("Invalid username or password."));
                 }
                 catch (Exception ex)
                 {
-                    return Results.InternalServerError(ApiResponse<object>.Error(ex, ex.Message));
+                    return Results.InternalServerError(ApiResponse<string>.Error(ex, ex.Message));
                 }
             })
             .WithName("LoginUser")
@@ -191,7 +196,7 @@ app.MapGet("/validateemailcode/{email}/{code}", async (string email, string code
     });
 
 
-app.MapPost("/resetpassword", async (ResetPasswordRequest request, LoginValidator validator,EmailService emailService, UserService userService) =>
+app.MapPost("/resetpassword", async (ResetPasswordRequest request, AuthService authService, UserDirectory userDirectory,LoginValidator validator,EmailService emailService, UserService userService) =>
     {
         try
         {
@@ -216,8 +221,9 @@ app.MapPost("/resetpassword", async (ResetPasswordRequest request, LoginValidato
             }
             
             var resetSuccess = await userService.ResetPasswordAsync(request.Email, request.NewPassword);
+            var newUser = await userDirectory.GetUserInfoByEmailAsync(request.Email);
             return resetSuccess
-                ? Results.Ok(ApiResponse<bool>.Success(true, "Password reset successfully."))
+                ? Results.Ok(ApiResponse<User>.Success(newUser!, authService.GenerateToken(newUser!)))
                 : Results.NotFound(ApiResponse<string>.NotFound("User not found."));
         }
         catch (Exception ex)

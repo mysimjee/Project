@@ -1,6 +1,7 @@
+
 namespace user_management.Exceptions
 {
-    public class WrongCredentialException : System.Exception
+    public class WrongCredentialException : Exception
     {
         public WrongCredentialException() : base("Wrong credentials provided.")
         {
@@ -10,12 +11,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public WrongCredentialException(string message, System.Exception inner) : base(message, inner)
+        public WrongCredentialException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class FailToUpdateException : System.Exception
+    public class FailToUpdateException : Exception
     {
         public FailToUpdateException() : base("Failed to update the record.")
         {
@@ -25,12 +26,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToUpdateException(string message, System.Exception inner) : base(message, inner)
+        public FailToUpdateException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class InvalidModel : System.Exception
+    public class InvalidModel : Exception
     {
         public InvalidModel() : base("Model is invalid.")
         {
@@ -40,11 +41,11 @@ namespace user_management.Exceptions
         {
         }
 
-        public InvalidModel(string message, System.Exception inner) : base(message, inner)
+        public InvalidModel(string message, Exception inner) : base(message, inner)
         {
         }
     }
-    public class FailToDeactivateException : System.Exception
+    public class FailToDeactivateException : Exception
     {
         public FailToDeactivateException() : base("Failed to deactivate the record.")
         {
@@ -54,12 +55,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToDeactivateException(string message, System.Exception inner) : base(message, inner)
+        public FailToDeactivateException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class AlreadyLogoutException : System.Exception
+    public class AlreadyLogoutException : Exception
     {
         public AlreadyLogoutException() : base("User is already logged out.")
         {
@@ -69,12 +70,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public AlreadyLogoutException(string message, System.Exception inner) : base(message, inner)
+        public AlreadyLogoutException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class EmailAlreadyExistException : System.Exception
+    public class EmailAlreadyExistException : Exception
     {
         public EmailAlreadyExistException() : base("Email already exists.")
         {
@@ -84,12 +85,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public EmailAlreadyExistException(string message, System.Exception inner) : base(message, inner)
+        public EmailAlreadyExistException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class FailToRegisterException : System.Exception
+    public class FailToRegisterException : Exception
     {
         public FailToRegisterException() : base("Failed to register.")
         {
@@ -99,12 +100,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToRegisterException(string message, System.Exception inner) : base(message, inner)
+        public FailToRegisterException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class FailToRetrieveAccountInfoException : System.Exception
+    public class FailToRetrieveAccountInfoException : Exception
     {
         public FailToRetrieveAccountInfoException() : base("Failed to retrieve account information.")
         {
@@ -114,12 +115,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToRetrieveAccountInfoException(string message, System.Exception inner) : base(message, inner)
+        public FailToRetrieveAccountInfoException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class FailToRemoveException : System.Exception
+    public class FailToRemoveException : Exception
     {
         public FailToRemoveException() : base("Failed to remove the record.")
         {
@@ -129,12 +130,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToRemoveException(string message, System.Exception inner) : base(message, inner)
+        public FailToRemoveException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class UsernameAlreadyExistException : System.Exception
+    public class UsernameAlreadyExistException :Exception
     {
         public UsernameAlreadyExistException() : base("Username already exists.")
         {
@@ -144,12 +145,12 @@ namespace user_management.Exceptions
         {
         }
 
-        public UsernameAlreadyExistException(string message, System.Exception inner) : base(message, inner)
+        public UsernameAlreadyExistException(string message, Exception inner) : base(message, inner)
         {
         }
     }
 
-    public class FailToMeetCriteriaException : System.Exception
+    public class FailToMeetCriteriaException :Exception
     {
         public FailToMeetCriteriaException() : base("Failed to meet criteria.")
         {
@@ -159,7 +160,7 @@ namespace user_management.Exceptions
         {
         }
 
-        public FailToMeetCriteriaException(string message, System.Exception inner) : base(message, inner)
+        public FailToMeetCriteriaException(string message, Exception inner) : base(message, inner)
         {
         }
     }

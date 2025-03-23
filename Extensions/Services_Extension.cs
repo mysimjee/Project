@@ -20,27 +20,7 @@ namespace user_management.Extensions
         {
             
             services.AddHttpContextAccessor();
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowAll",
-                    policy => policy.AllowAnyOrigin()
-                                    .AllowAnyMethod()
-                                    .AllowAnyHeader());
-            });
-            
-            // Allow only specific origins and with credentials
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowLocalhost",
-                    builder => builder
-                        .WithOrigins("http://localhost:63342") // Your frontend URL
-                        .AllowCredentials()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod());
-            });
-            
             services.AddSignalR();
-
             services.AddTransient<AuthService>();
 
             

@@ -33,28 +33,38 @@ namespace user_management.Services
         
 
 
+        public async Task<int> GetLoginHistoryCountAsync(int userId)
+        {
+            return await _context.LoginHistories
+                .Where(lh => lh.UserId == userId)
+                .CountAsync();
+        }
 
-public async Task<int> GetUserIdByUsernameAsync(string username)
+public async Task<User?> GetUserInfoByUsernameAsync(string username)
 {
     var user = await _context.Users.Where(u => u.Username == username).FirstOrDefaultAsync();
 
     if (user == null)
     {
         _logger.LogError("User with username {0} not found.", username);
-        return 0; 
+        return null; 
     }
-    return user.UserId;
+    return user;
 }
 
-public async Task<List<LoginHistory>> GetLoginHistoryAsync(int userId, int skip, int limit)
+public async Task<User?> GetUserInfoByEmailAsync(string email)
 {
-    return await _context.LoginHistories
-        .Where(lh => lh.UserId == userId)
-        .OrderByDescending(lh => lh.LoginTimestamp)
-        .Skip(skip)
-        .Take(limit)
-        .ToListAsync();
+    var user = await _context.Users.Where(u => u.Email == email).FirstOrDefaultAsync();
+
+    if (user == null)
+    {
+        _logger.LogError("User with email {0} not found.", email);
+        return null; 
+    }
+    return user;
 }
+
+
 
 public async Task<bool> AddUserAsync(User user)
         {
@@ -64,14 +74,14 @@ public async Task<bool> AddUserAsync(User user)
             if (accountWithExistingEmail != null)
             {
                 _logger.LogError("User with this email already exists.");
-                throw new EmailAlreadyExistException("User with this email already exists.");
+                throw new EmailAlreadyExistException();
             }
 
             var accountWithExistingUsername =  await _context.Users.Where(u => u.Username == user.Username).FirstOrDefaultAsync();
             if (accountWithExistingUsername != null)
             {
                 _logger.LogError("User with this username already exists.");
-                throw new UsernameAlreadyExistException("User with this username already exists.");
+                throw new UsernameAlreadyExistException();
             }
    
             // Hash the password
